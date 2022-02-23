@@ -14,16 +14,16 @@ class ShutdownHandler
 
     private HttpErrorHandler $errorHandler;
 
-    private bool $displayErrorDetails;
+    private HttpErrorHandlerSettings $settings;
 
     public function __construct(
         Request $request,
         HttpErrorHandler $errorHandler,
-        bool $displayErrorDetails
+        HttpErrorHandlerSettings $settings
     ) {
         $this->request = $request;
         $this->errorHandler = $errorHandler;
-        $this->displayErrorDetails = $displayErrorDetails;
+        $this->settings = $settings;
     }
 
     public function __invoke()
@@ -36,7 +36,7 @@ class ShutdownHandler
             $errorType = $error['type'];
             $message = 'An error while processing your request. Please try again later.';
 
-            if ($this->displayErrorDetails) {
+            if ($this->settings->isDisplayErrorDetails()) {
                 switch ($errorType) {
                     case E_USER_ERROR:
                         $message = "FATAL ERROR: {$errorMessage}. ";
@@ -62,7 +62,7 @@ class ShutdownHandler
             $response = $this->errorHandler->__invoke(
                 $this->request,
                 $exception,
-                $this->displayErrorDetails,
+                $this->settings->isDisplayErrorDetails(),
                 false,
                 false,
             );

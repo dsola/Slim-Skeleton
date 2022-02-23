@@ -2,7 +2,9 @@
 
 declare(strict_types=1);
 
+use App\Application\Handlers\ErrorReportingLevel;
 use App\Application\Handlers\HttpErrorHandler;
+use App\Application\Handlers\HttpErrorHandlerSettings;
 use App\Application\Handlers\ShutdownHandler;
 use App\Application\ResponseEmitter\ResponseEmitter;
 use App\Application\Settings\SettingsInterface;
@@ -63,7 +65,14 @@ $responseFactory = $app->getResponseFactory();
 $errorHandler = new HttpErrorHandler($callableResolver, $responseFactory);
 
 // Create Shutdown Handler
-$shutdownHandler = new ShutdownHandler($request, $errorHandler, $displayErrorDetails);
+$shutdownHandler = new ShutdownHandler(
+    $request,
+    $errorHandler,
+    new HttpErrorHandlerSettings(
+        new ErrorReportingLevel($settings->get('errorReportingLevel')),
+        $settings->get('displayErrorDetails')
+    )
+);
 register_shutdown_function($shutdownHandler);
 
 // Add Routing Middleware
